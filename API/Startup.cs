@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 
 namespace API
 {
@@ -35,6 +36,13 @@ namespace API
                 _config.GetConnectionString("DefaultConnection"),
                 options => options.SetPostgresVersion(new System.Version(9, 6))
                 )));
+
+            services.AddSingleton<IConnectionMultiplexer>( c => {
+                var configuration = ConfigurationOptions.Parse(_config.GetConnectionString("Redis"),
+                    true);
+                return ConnectionMultiplexer.Connect(configuration);
+             }
+            );
             services.AddApplicationServices();
             services.AddSwaggerDocumentation();
             services.AddCors(opt => 
